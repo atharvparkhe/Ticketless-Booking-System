@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<h1>New Couse</h1><br>
+
+<h1>Name : {{course.name}}</h1>
+<img src="{{ base_url }}{{ course.img.url }}">
+<p>short_desc : {{course.short_desc}}</p>
+<p>category : {{course.category.category_name}}</p>
+<p>description : {{course.description}}</p>
+
+{% endblock content %}

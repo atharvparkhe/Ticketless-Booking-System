@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<h1>New Product</h1><br>
+
+<h1>Name : {{product.name}}</h1>
+<img src="{{ base_url }}{{ product.img.url }}">
+<p>short_desc : {{product.short_desc}}</p>
+<p>category : {{product.category.category_name}}</p>
+<p>description : {{product.description}}</p>
+
+{% endblock content %}

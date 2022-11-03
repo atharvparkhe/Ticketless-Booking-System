@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<h1>title : {{obj.title}}</h1><br><br>
+<h4>description : {{obj.desc}}</h4><br><br>
+<h4>category : {{obj.category}}</h4><br><br>
+<img src="{{ obj.img.url }}">
+{% endblock content %}
