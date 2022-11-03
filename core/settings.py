@@ -314,3 +314,10 @@ JAZZMIN_SETTINGS = {
     # Add a language dropdown into the admin
     # "language_chooser": True,
 }
+
+
+RAZORPAY_PUBLIC_KEY = config("PUBLIC_KEY")
+RAZORPAY_PRIVATE_KEY = config("PRIVATE_KEY")
+
+TWILIO_ACCOUNT_ID = config("TWILIO_ACCOUNT_SID")
+TWILIO_AUTH_TOKEN = config("TWILIO_AUTH_TOKEN")

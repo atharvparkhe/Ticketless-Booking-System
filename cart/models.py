@@ -1,3 +1,4 @@
+from email.policy import default
 from django.db import models
 from authentication.models import CustomerModel
 from django.db.models.signals import pre_save, post_save
@@ -5,6 +6,7 @@ from django.dispatch import receiver
 from base.models import BaseModel
 from app.models import PlaceModel, TimeSlotModel
 from django.db.models import Sum
+
 
 
 class OrderModel(BaseModel):
@@ -15,6 +17,7 @@ class OrderModel(BaseModel):
     is_paid = models.BooleanField(default=False)
     cancellation_request = models.BooleanField(default=False)
     coupon_applied = models.BooleanField(default=False)
+    qr_img = models.ImageField(upload_to="QR", height_field=None, width_field=None, max_length=None, null=True, blank=True)
     razorpay_order_id = models.CharField(max_length=50, null=True, blank=True, editable=False)
     razorpay_payment_id = models.CharField(max_length=50, null=True, blank=True, editable=False)
     razorpay_signature = models.CharField(max_length=50, null=True, blank=True, editable=False)
@@ -29,7 +32,7 @@ class OrderItemsModel(BaseModel):
     item = models.ForeignKey(PlaceModel, related_name="related_items", on_delete=models.PROTECT)
     quantity = models.PositiveIntegerField(default=1)
     total = models.FloatField(default=0)
-    appoitment = models.DateField(auto_now=False, auto_now_add=False)
+    date = models.DateField(auto_now=False, auto_now_add=False)
     time_slot = models.ForeignKey(TimeSlotModel, related_name="booking_slot", on_delete=models.CASCADE)
     def __str__(self):
         return self.item.name
@@ -41,6 +44,15 @@ class CouponsModel(BaseModel):
     use_times = models.PositiveIntegerField(default=10)
     def __str__(self):
         return self.coupon_name
+
+
+class TicketModel(BaseModel):
+    has_attended = models.BooleanField(default=False)
+    order = models.ForeignKey(OrderModel, related_name="order_ticket", on_delete=models.CASCADE)
+    img = models.ImageField(upload_to="tickets", height_field=None, width_field=None, max_length=None)
+    valid_till = models.DateTimeField(auto_now=False, auto_now_add=False)
+    def __str__(self):
+        return self.order.owner.name
 
 
 @receiver(pre_save, sender=OrderItemsModel)
