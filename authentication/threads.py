@@ -41,7 +41,10 @@ class send_forgot_link(threading.Thread):
         threading.Thread.__init__(self)
     def run(self):
         try:
-            otp = random.randint(100001, 999999)
+            otp = random.randint(1001, 9999)
+            print("##################")
+            print(otp)
+            print("##################")
             cache.set(otp, self.email, timeout=350)
             context["otp"] = otp
             html_template = 'forgot.html'
