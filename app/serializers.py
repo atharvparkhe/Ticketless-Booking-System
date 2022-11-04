@@ -17,7 +17,7 @@ class MultiPlaceImagesSerializer(serializers.ModelSerializer):
 class TimeSlotsSerializer(serializers.ModelSerializer):
     class Meta:
         model = TimeSlotModel
-        fields = ["start_time", "end_time"]
+        fields = ["id", "start_time", "end_time"]
 
 
 class SinglePlaceModelSerializer(serializers.ModelSerializer):

@@ -7,6 +7,7 @@ from .models import *
 
 
 class ScanQRSerializer(serializers.Serializer):
+    location_id = serializers.CharField(required=True)
     decoded_string = serializers.CharField(required=True)
 
 
@@ -14,7 +15,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
     item = MultiPlacesModelSerializer()
     class Meta:
         model = OrderItemsModel
-        fields = ["item", "quantity", "total", "appoitment"]
+        fields = ["item", "quantity", "total", "date"]
 
 
 class OrderSerializer(serializers.ModelSerializer):
@@ -35,8 +36,8 @@ class OrderSerializer(serializers.ModelSerializer):
 
 
 class PaymentCredentials(serializers.Serializer):
-    razorpay_payment_id  = serializers.CharField(required = False)
-    razorpay_signature  = serializers.CharField(required = False)
+    razorpay_payment_id  = serializers.CharField(required = True)
+    razorpay_signature  = serializers.CharField(required = True)
 
 
 class CouponSerializer(serializers.Serializer):
@@ -44,9 +45,9 @@ class CouponSerializer(serializers.Serializer):
 
 
 class ModifyCartItemsSerializer(serializers.Serializer):
-    activity_id = serializers.CharField(required = True)
+    place_id = serializers.CharField(required = True)
     quantity = serializers.IntegerField(required = True)
-    appoitment = serializers.DateField(required = True)
+    date = serializers.DateField(required = True)
     slot_id = serializers.CharField(required = True)
 
 

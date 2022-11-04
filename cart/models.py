@@ -17,13 +17,12 @@ class OrderModel(BaseModel):
     is_paid = models.BooleanField(default=False)
     cancellation_request = models.BooleanField(default=False)
     coupon_applied = models.BooleanField(default=False)
-    qr_img = models.ImageField(upload_to="QR", height_field=None, width_field=None, max_length=None, null=True, blank=True)
     razorpay_order_id = models.CharField(max_length=50, null=True, blank=True, editable=False)
     razorpay_payment_id = models.CharField(max_length=50, null=True, blank=True, editable=False)
     razorpay_signature = models.CharField(max_length=50, null=True, blank=True, editable=False)
     invoice = models.FileField(upload_to="invoice", max_length=100, null=True, blank=True)
     def __str__(self):
-        return self.owner.name
+        return self.owner.f_name
 
 
 class OrderItemsModel(BaseModel):
@@ -33,7 +32,10 @@ class OrderItemsModel(BaseModel):
     quantity = models.PositiveIntegerField(default=1)
     total = models.FloatField(default=0)
     date = models.DateField(auto_now=False, auto_now_add=False)
+    qr_img = models.ImageField(upload_to="QR", height_field=None, width_field=None, max_length=None, null=True, blank=True)
     time_slot = models.ForeignKey(TimeSlotModel, related_name="booking_slot", on_delete=models.CASCADE)
+    has_attended = models.BooleanField(default=False)
+    ticket = models.ImageField(upload_to="tickets", height_field=None, width_field=None, max_length=None)
     def __str__(self):
         return self.item.name
 
@@ -44,15 +46,6 @@ class CouponsModel(BaseModel):
     use_times = models.PositiveIntegerField(default=10)
     def __str__(self):
         return self.coupon_name
-
-
-class TicketModel(BaseModel):
-    has_attended = models.BooleanField(default=False)
-    order = models.ForeignKey(OrderModel, related_name="order_ticket", on_delete=models.CASCADE)
-    img = models.ImageField(upload_to="tickets", height_field=None, width_field=None, max_length=None)
-    valid_till = models.DateTimeField(auto_now=False, auto_now_add=False)
-    def __str__(self):
-        return self.order.owner.name
 
 
 @receiver(pre_save, sender=OrderItemsModel)

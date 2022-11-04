@@ -10,7 +10,7 @@ from .serializers import *
 from .threads import *
 from .models import *
 
-import razorpay, qrcode
+import razorpay, cryptocode
 from twilio.rest import Client
 
 
@@ -39,7 +39,7 @@ def book_now(request):
             appointment = serializer.data["date"]
             quan = int(serializer.data["quantity"])
             if cart_obj.related_cart.filter(item=place_obj, date=appointment).exists():
-                cart_item = OrderItemsModel.objects.get(cart=cart_obj, item=place_obj, appoitment=appointment, time_slot=time_slot_obj)
+                cart_item = OrderItemsModel.objects.get(cart=cart_obj, item=place_obj, date=appointment, time_slot=time_slot_obj)
                 cart_item.quantity += quan
                 cart_item.save()
             else :
@@ -47,7 +47,7 @@ def book_now(request):
                     owner=customer,
                     cart=cart_obj,
                     item=place_obj,
-                    appoitment=appointment,
+                    date=appointment,
                     time_slot=time_slot_obj,
                     quantity=quan
                 )
@@ -121,28 +121,21 @@ def resultPage(request):
                 "razorpay_payment_id" : serializer.data["razorpay_payment_id"],
                 "razorpay_signature" : serializer.data["razorpay_signature"]
             }
-            check = client.utility.verify_payment_signature(payment_credentials)
-            if check:
-                return Response({"message":"Payment Failed"}, status=status.HTTP_403_FORBIDDEN)
-            cart_obj.payment_id = payment_credentials["razorpay_payment_id"]
-            cart_obj.payment_signature = payment_credentials["razorpay_signature"]
+            # check = client.utility.verify_payment_signature(payment_credentials)
+            # if check:
+            #     return Response({"message":"Payment Failed"}, status=status.HTTP_403_FORBIDDEN)
+            cart_obj.razorpay_payment_id = payment_credentials["razorpay_payment_id"]
+            cart_obj.razorpay_signature = payment_credentials["razorpay_signature"]
             cart_obj.is_paid = True
-            thread_obj = generate_invoice(cart_obj)
-            thread_obj.start()
+            # thread_obj = generate_invoice(cart_obj)
+            # thread_obj.start()
             thread_obj_2 = send_tickets(cart_obj)
             thread_obj_2.start()
             cart_obj.save()
-            # s = f"New Order\nCustomer Name: {cart_obj.owner.f_name} {cart_obj.owner.l_name}\nCustomer Email ID: {cart_obj.owner.email}\nCustomer Phone No: {cart_obj.owner.phone}\n\n"
-            # for cart_item in cart_obj.related_cart.all():
-            #     s += f"Activity: {cart_item.item.name}\nDate: {cart_item.appoitment}\nSeats: {cart_item.quantity}\nTimm Slot: {cart_item.time_slot.slot_start_time}-{cart_item.time_slot.slot_end_time}\n"
-            # twilio_client.messages.create(
-            #     from_ = 'whatsapp:+14155238886',
-            #     body = s,
-            #     to = f"whatsapp:+918007609672"
-            # )
             return Response({"message":"Payment Successfull"}, status=status.HTTP_200_OK)
         return Response({"error":serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
+        print(e)
         return Response({"error":str(e), "message":"Something went wrong"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -152,7 +145,11 @@ def scan_ticket(request):
     try:
         ser = ScanQRSerializer(data=request.data)
         if ser.is_valid():
-            decoded_string = ser.data["decoded_string"]
+            decoded_string = cryptocode.decrypt(ser.data["decoded_string"], settings.SECRET_KEY)
+            if not OrderModel.objects.filter(id=decoded_string).exists():
+                return Response({"message":"Invalid Ticket"}, status=status.HTTP_406_NOT_ACCEPTABLE)
+            cart_obj = OrderModel.objects.get(id=decoded_string)
+            cart_obj.rela
             return Response({"is_success":False}, status=status.HTTP_200_OK)
         return Response({"error":ser.errors}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:

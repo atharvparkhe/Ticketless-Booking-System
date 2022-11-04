@@ -6,18 +6,8 @@ from .utils import *
 
 from PIL import Image, ImageDraw, ImageFont
 
-img = Image.open("ticket.jpeg")
-font = ImageFont.truetype("font.ttf", 30)
-draw = ImageDraw.Draw(img)
-
 context = {}
 
-# im1 = Image.open(file_name)
-# im2 = Image.open(path)
-
-# ticket = im2.copy()
-# ticket.paste(im1, (700, 25))
-# ticket.save("main.jpeg")
 
 class send_tickets(threading.Thread):
     def __init__(self, cart):
@@ -25,16 +15,41 @@ class send_tickets(threading.Thread):
         threading.Thread.__init__(self)
     def run(self):
         try:
-            qr = qrcode.make("hello")
-            file_name = "data/QR/" + str(self.cart.id) + ".jpeg"
-            qr.save(file_name)
-            # draw.text(xy=(150, 40), text="Old Goa Church", fill=(0,0,0), font=font)
-            # draw.text(xy=(220, 83), text="Atharva Parkhe", fill=(0,0,0), font=font)
-            # draw.text(xy=(280, 130), text="3", fill=(0,0,0), font=font)
-            # draw.text(xy=(135, 170), text="2022-11-03", fill=(0,0,0), font=font)
-            # draw.text(xy=(135, 215), text="09:00:00 - 10:00:00", fill=(0,0,0), font=font)
-            # path = "tickets/temp.jpeg"
-            # img.save(path)
+            html_template = 'tickets.html'
+            html_message = render_to_string(html_template, context)
+            subject = 'Your Tickets.'
+            email_from = settings.EMAIL_HOST_USER
+            msg = EmailMessage(subject, html_message, email_from, [self.cart.owner.email])
+            msg.content_subtype = 'html'
+
+            img = Image.open("ticket.jpeg")
+            font = ImageFont.truetype("font.ttf", 30)
+            draw = ImageDraw.Draw(img)
+
+            for obj in self.cart.related_cart.all():
+
+                qr = qrcode.make(str(self.cart.id))
+                file_name = "data/QR/" + str(self.cart.id) + ".jpeg"
+                qr.save(file_name)
+                obj.qr_img = file_name
+                draw.text(xy=(150, 40), text=str(obj.item.name), fill=(0,0,0), font=font)
+                draw.text(xy=(220, 83), text=str(obj.owner.f_name) + "  " + str(obj.owner.l_name), fill=(0,0,0), font=font)
+                draw.text(xy=(280, 130), text=str(obj.quantity), fill=(0,0,0), font=font)
+                draw.text(xy=(135, 170), text=str(obj.date), fill=(0,0,0), font=font)
+                draw.text(xy=(135, 215), text=str(obj.time_slot.start_time) + " - " + str(obj.time_slot.end_time), fill=(0,0,0), font=font)
+                path = "data/temp/" + str(obj.id) + ".jpeg"
+                img.save(path)
+                im1 = Image.open(file_name)
+                im2 = Image.open(path)
+                ticket = im2.copy()
+                ticket.paste(im1, (700, 25))
+                final_path = "data/Tickets/" + str(self.cart.id) + ".jpeg"
+                ticket.save(final_path)
+                obj.ticket = final_path
+                obj.save()
+                msg.attach_file(path)
+
+            msg.send()
         except Exception as e:
             print(e)
 
