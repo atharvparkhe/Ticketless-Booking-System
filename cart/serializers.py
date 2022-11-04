@@ -7,7 +7,7 @@ from .models import *
 
 
 class ScanQRSerializer(serializers.Serializer):
-    location_id = serializers.CharField(required=True)
+    place_id = serializers.CharField(required=True)
     decoded_string = serializers.CharField(required=True)
 
 

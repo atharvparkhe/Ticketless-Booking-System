@@ -1,4 +1,3 @@
-from email.policy import default
 from django.db import models
 from authentication.models import CustomerModel
 from django.db.models.signals import pre_save, post_save
@@ -32,7 +31,7 @@ class OrderItemsModel(BaseModel):
     quantity = models.PositiveIntegerField(default=1)
     total = models.FloatField(default=0)
     date = models.DateField(auto_now=False, auto_now_add=False)
-    qr_img = models.ImageField(upload_to="QR", height_field=None, width_field=None, max_length=None, null=True, blank=True)
+    qr_img = models.ImageField(upload_to="QR", height_field=290, width_field=290, max_length=None, null=True, blank=True)
     time_slot = models.ForeignKey(TimeSlotModel, related_name="booking_slot", on_delete=models.CASCADE)
     has_attended = models.BooleanField(default=False)
     ticket = models.ImageField(upload_to="tickets", height_field=None, width_field=None, max_length=None)

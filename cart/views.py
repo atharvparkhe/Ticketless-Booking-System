@@ -1,6 +1,5 @@
-from rest_framework.generics import ListAPIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
@@ -9,6 +8,8 @@ from app.models import *
 from .serializers import *
 from .threads import *
 from .models import *
+
+from datetime import datetime
 
 import razorpay, cryptocode
 from twilio.rest import Client
@@ -148,16 +149,15 @@ def scan_ticket(request):
             decoded_string = cryptocode.decrypt(ser.data["decoded_string"], settings.SECRET_KEY)
             if not OrderModel.objects.filter(id=decoded_string).exists():
                 return Response({"message":"Invalid Ticket"}, status=status.HTTP_406_NOT_ACCEPTABLE)
-            cart_obj = OrderModel.objects.get(id=decoded_string)
-            cart_obj.rela
-            return Response({"is_success":False}, status=status.HTTP_200_OK)
+            cart_item_obj = OrderModel.objects.get(id=decoded_string)
+            place_obj = PlaceModel.objects.get(id=ser.data["place_id"])
+            today = datetime.today().strftime("%Y-%m-%d")
+            if cart_item_obj.item == place_obj and cart_item_obj.date == today:
+                cart_item_obj.has_attended = True
+                cart_item_obj.save()
+                return Response({"message":"Ticket Accepted", "is_success":True}, status=status.HTTP_202_ACCEPTED)
+            else:
+                return Response({"message":"Ticket Rejected", "is_success":False}, status=status.HTTP_406_NOT_ACCEPTABLE)
         return Response({"error":ser.errors}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response({"error":str(e), "message":"Something went wrong"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-
-
-# qr = qrcode.make(ser.data["text"])
-# file_name = "data/download/" + str(uuid.uuid4()) + ".jpeg"
-# qr.save(file_name)

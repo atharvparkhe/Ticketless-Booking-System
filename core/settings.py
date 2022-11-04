@@ -179,7 +179,7 @@ CACHES = {
 
 JAZZMIN_SETTINGS = {
     # title of the window (Will default to current_admin_site.site_title if absent or None)
-    "site_title": "Ticketless Booking System Admin",
+    "site_title": "Ticketless Booking System",
 
     # Title on the login screen (19 chars max) (defaults to current_admin_site.site_header if absent or None)
     "site_header": "Ticketless Booking System",
